@@ -5,7 +5,7 @@ OBJS		= entry.o synchronization.o init.o transport.o netapi.o \
 				server.o request.o response.o post.o
 BINARY		= kernel
 
-VERSION		?= $(or $(shell git describe parent 2>/dev/null), \
+VERSION		?= $(or $(shell git describe 2>/dev/null), \
 			$(shell git rev-parse HEAD 2>/dev/null), \
 			1.0)
 
