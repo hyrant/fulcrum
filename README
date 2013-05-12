@@ -12,7 +12,8 @@ clearly had the same sort of idea.  Theirs looks like it's much more user
 friendly.
 
 
-# Requirements
+Requirements
+============
 
 A working arm-none-eabi gcc.  Use https://github.com/esden/summon-arm-toolchain
 to make it easy.
@@ -25,7 +26,8 @@ For fabricating the boards, a service with a tolerance of 8mil should be be
 sufficient.  I use http://www.oshpark.com/
 
 
-# General Goals
+General Goals
+=============
 
 The idea behind the creation of this was to create a module that could easily
 be reprogrammed remotely but exposed most the STM32F1 microcontroller without
@@ -50,9 +52,11 @@ configuration).  The interface to change the IP and networking parameters are
 NOT exposed to the user code, since that could easily render the module
 not remotely accessible.
 
-# Usage
+Usage
+=====
 
-## Board Setup
+Board Setup
+-----------
 
 Flashing the board is accomplished by holding the boot pad high then pulsing
 the reset one low.  Depending on if write protect was enabled, it's also 
@@ -70,14 +74,16 @@ Once fully configured the board will listen on port 80 for HTTP requests.
 That is simply open a web browser to http://<IP>/fulcrum to access the 
 programming interface.  The application can provide other URLs as well.
 
-### Board Reset 
+Board Reset 
+-----------
 
 The board can be reset to its initial state (setup parameters discarded and
 re-entering setup mode) by holding the LED pin low during a reset.  That is,
 ground the resistor near the LED (on th side closer to the microcontroller)
 and then pull reset low momentarily.
 
-## Application Creation
+Application Creation
+--------------------
 
 First, take a look at the two examples ("example" and "rnxv").  Basically 
 they simply need to be located in the correct location and they will run
@@ -87,7 +93,8 @@ ld file to get the necessary symbols.
 The application can provide new URLs for the device to serve using the kernel
 HTTP engine.  Both examples demonstrate this by override in the root page.
 
-### Limitations
+Limitations
+-----------
 
 The kernel reserves the first 1k of ram and the first 25k of flash.  It also
 requires exclusive use of DMA channels 2 and 3, EXTI15, the IWDG, and the 
