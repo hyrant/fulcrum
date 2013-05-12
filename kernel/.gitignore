@@ -1,0 +1,9 @@
+*.d
+*.o
+*.elf
+*.hex
+*.bin
+*.list
+*.srec
+exports.c
+exports.ld

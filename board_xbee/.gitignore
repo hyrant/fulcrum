@@ -1,0 +1,7 @@
+*.gbr
+*.pcb-
+*.sch~
+*.cnc
+*.net
+*.new.pcb
+*.cmd

@@ -1,0 +1,14 @@
+Element["" "RP-SMA Board Lunach SMT antenna connector" "CONN0" "" 0 0 -8000 -22000 0 100 ""]
+(
+	Pad[-13000 0 -3000 0 6000 2000 6000 "SIG" "1" "square,nopaste"]
+	Pad[-13000 -10000 -3000 -10000 6000 2000 6000 "GND" "2" "square,nopaste"]
+	Pad[-13000 10000 -3000 10000 6000 2000 6000 "GND" "3" "square,nopaste"]
+	Pad[-13000 -10000 -3000 -10000 6000 2000 6000 "GND" "4" "square,onsolder,nopaste"]
+	Pad[-13000 10000 -3000 10000 6000 2000 6000 "GND" "5" "square,onsolder,nopaste"]
+
+
+	ElementLine[0 -15000 10000 -15000 1000]
+	ElementLine[0 15000 10000 15000 1000]
+	ElementLine[0 -15000 0 15000 1000]
+	ElementLine[10000 -15000 10000 15000 1000]
+)

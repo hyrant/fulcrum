@@ -1,0 +1,11 @@
+Element["" "u.FL SMT antenna connector" "CONN0" "" 0 0 -8000 -13000 0 100 ""]
+(
+	Pad[0 5906 0 5906 3937 2000 3937 "SIG" "1" "square"]
+	Pad[-5807 2264 -5807 -2264 4134 2000 4134 "GND" "2" "square"]
+	Pad[5807 2264 5807 -2264 4134 2000 4134 "GND" "3" "square"]
+
+	ElementLine[-5906 -6102 5906 -6102 1000]
+	ElementLine[-5906 6102 5906 6102 1000]
+	ElementLine[-5906 -6102 -5906 6102 1000]
+	ElementLine[5906 -6102 5906 6102 1000]
+)

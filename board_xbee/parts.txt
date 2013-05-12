@@ -1,0 +1,14 @@
+IDs,Total,DigiKeyPartNumber,Notes
+C1;C2;C3,3,1276-1011-1-ND,Generic 0.1uF 0603 ceramic capacitor > 3.3V
+C5;C6,2,1276-1041-1-ND,Generic 1uF 0603 ceramic capacitor > 3.3V
+C4,1,1276-1045-1-ND,Generic 4.7uF 0603 ceramic capacitor > 3.3
+D1,1,754-1116-1-ND,Generic 0603 LED
+R1,1,311-10KGRCT-ND,Generic 10k 0603 resistor
+R2,1,311-62GRCT-ND,Generic ~65 0603 resstor (set for LED current)
+U1,1,296-35512-1-ND,TI CC3000 WiFi Transceiver Module
+U2,1,497-10498-ND,STM32F100 Microcontroller LQFP-48
+XX,1,S5800-40-ND,Generic 2mm Connection Headers (break away)
+XX,1,CONREVSMA003.062-ND,Antenna (select 1): RP-SMA End Launch connector
+XX,1,WM4893CT-ND,Antenna (select 1): SMD Helical Chip Antenna
+XX,1,H9161-ND,Antenna (select 1): u.FL connector
+XX,1,N/A,Antenna (select 1): Whip (solder a 1.23in/31mm wire)

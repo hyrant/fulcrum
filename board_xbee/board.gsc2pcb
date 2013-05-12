@@ -1,0 +1,3 @@
+schematics main.sch
+output-name board
+elements-dir footprints
