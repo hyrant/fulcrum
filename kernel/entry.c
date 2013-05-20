@@ -57,7 +57,7 @@ bool Kernel_interruptsEnabled(void)
 static uint32_t wrapU32(uint32_t start, uint32_t now)
 {
     if (now < start)
-        return 0xFFFFFFFF - now + start;
+        return 0xFFFFFFFF - start + now;
     return now - start;
 }
 
