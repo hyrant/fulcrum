@@ -995,7 +995,7 @@ int select(fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
      * don't starve the kernel of access to the interface. */
     parameters.blocking = 0;
     parameters.to_sec = 0;
-    parameters.to_usec = 16384;
+    parameters.to_usec = 4096;
     
     if (timeout == 0) {
         while (true) {
@@ -1004,11 +1004,14 @@ int select(fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
                 return -1;
             if (result.status != 0)
                 break;
-            Kernel_msleep(64);
+            Kernel_msleep(256);
         }
     } else {
         uint32_t waitST = (timeout * TICK_RATE) / 1000;
         uint32_t start = systick;
+        uint32_t sleepTime = 256;
+        if (sleepTime > timeout)
+            sleepTime = timeout;
         while (true) {
             if (!commandIO(HCI_CMND_BSD_SELECT, &parameters, sizeof(parameters),
                     &result, sizeof(result)))
@@ -1017,7 +1020,7 @@ int select(fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
                 break;
             if (Kernel_elapsed(start) >= waitST)
                 return 0;
-            Kernel_msleep(timeout/8);
+            Kernel_msleep(sleepTime);
         }
     }
     
