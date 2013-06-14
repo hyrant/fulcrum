@@ -39,7 +39,7 @@ if len(ip) > 0:
     if len(gateway) >= 7:
         ip = ip + "|GATEWAY:" + gateway
     if len(dns) >= 7:
-        ip = ip + "|GATEWAY:" + dns
+        ip = ip + "|DNS:" + dns
 else:
     leaseTimeout = raw_input("Lease timeout (seconds) [System Default]: ").replace(" ", "")
     if len(leaseTimeout) > 0:

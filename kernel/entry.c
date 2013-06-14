@@ -801,7 +801,7 @@ void (*const vector_table[]) (void) = {
     null_handler,       /* SVCall */
     0, 0,               /* Reserved */
     pendsv_handler,     /* PendSV */
-    systick_handler,	/* Systick */
+    systick_handler,    /* Systick */
 
     null_handler,       /* WWD */
     null_handler,       /* PVD */

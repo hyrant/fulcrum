@@ -1,1 +1,1 @@
-../patcher/data.h
+../common/tidata.h
