@@ -312,6 +312,6 @@ void Server_init(void)
     handler_tcp_closed(handleTCPClosed);
     handleNetworkReset();
     
-    //thread_start(tcpServerThread, NULL, (uint8_t *)&_stack - 1024 - 256 * 2);
+    thread_start(tcpServerThread, NULL, (uint8_t *)&_stack - 1024 - 256 * 2);
     thread_start(udpServerThread, NULL, (uint8_t *)&_stack - 1024 - 256 * 4);
 }
