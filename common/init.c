@@ -333,10 +333,11 @@ uint32_t Kernel_fractionalSeconds(void)
     if (interruptable)
         enableInterrupts();
         
-    if (stf2 < stf) {
+    if (stf2 > stf) {
         ++st;
         stf = stf2;
     }
+    stf = STK_VAL - stf;
     
     st *= (uint32_t)(65536 / TICK_RATE + 0.5);    
     stf *= (uint32_t)(65536 / TICK_RATE + 0.5);
