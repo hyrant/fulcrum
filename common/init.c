@@ -337,7 +337,7 @@ uint32_t Kernel_fractionalSeconds(void)
         ++st;
         stf = stf2;
     }
-    stf = STK_VAL - stf;
+    stf = STMAX - stf;
     
     st *= (uint32_t)(65536 / TICK_RATE + 0.5);    
     stf *= (uint32_t)(65536 / TICK_RATE + 0.5);
