@@ -39,8 +39,11 @@
 #define PIN_CONFIG(n, mode, conf)   (((mode) << (((n)%8)*4)) | ((conf) << (((n)%8)*4 + 2)))
 #define PIN_CONFIG_MASK(n)          (0xF << (((n)%8)*4))
 
+#ifndef F_CPU
 #define F_CPU   24000000
-#define STMAX   ((uint32_t)(24000000 / TICK_RATE / 8 + 0.5))
+#endif
+
+#define STMAX   ((uint32_t)(F_CPU / TICK_RATE / 8 + 0.5))
 
 static void setUsedClocks(void)
 {
@@ -50,49 +53,8 @@ static void setUsedClocks(void)
         RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN;
 }
 
-bool Kernel_initializePeripherals(void)
+static void resetIO(void)
 {
-    /* Disable and reset everything */
-    RCC_AHBENR = 0;
-    RCC_APB1ENR = 0;
-    RCC_APB2ENR = 0;
-    RCC_AHBRSTR = 0xFFFFFFFF;
-    RCC_APB1RSTR = 0xFFFFFFFF;
-    RCC_APB2RSTR = 0xFFFFFFFF;
-    /* All device memory is strongly ordered, so no barrier */    
-    RCC_AHBRSTR = 0;
-    RCC_APB1RSTR = 0;
-    RCC_APB2RSTR = 0;
-    
-    /* Start the HSI (and the LSI for the IWDG), then clock to 24 Mhz */
-    RCC_CR |= RCC_CR_HSION;
-    RCC_CSR |= RCC_CSR_LSION;
-    while ((RCC_CR & RCC_CR_HSIRDY) == 0) { }
-    /* First just switch to the HSI directly and set the prescalars we'll
-     * need later */
-    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV2 |
-        RCC_CFGR_PPRE1_HCLK_NODIV | RCC_CFGR_PPRE2_HCLK_NODIV |
-        RCC_CFGR_SW_SYSCLKSEL_HSICLK;
-    /* Zero wait states needed */
-    FLASH_ACR = FLASH_LATENCY_0WS | FLASH_PRFTBE | FLASH_HLFCYA;
-    
-    /*Switch to PLL */
-    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV2 |
-        RCC_CFGR_PPRE1_HCLK_NODIV | RCC_CFGR_PPRE2_HCLK_NODIV |
-        RCC_CFGR_SW_SYSCLKSEL_HSICLK | 
-        (RCC_CFGR_PLLMUL_PLL_CLK_MUL6 << 18) | 
-        (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
-    RCC_CR |= RCC_CR_PLLON;
-    while ((RCC_CR & RCC_CR_PLLRDY) == 0) { }
-    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV2 |
-        RCC_CFGR_PPRE1_HCLK_NODIV | RCC_CFGR_PPRE2_HCLK_NODIV |
-        RCC_CFGR_SW_SYSCLKSEL_PLLCLK |
-        (RCC_CFGR_PLLMUL_PLL_CLK_MUL6 << 18) | 
-        (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
-    
-    /* Enable the clocks to the components the kernel uses */
-    setUsedClocks();
-    
     GPIO_CRL(GPIOA) = 
         PIN_CONFIG(0, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT) |
         PIN_CONFIG(1, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT) |
@@ -147,6 +109,83 @@ bool Kernel_initializePeripherals(void)
         PIN_CONFIG(5, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT) |
         PIN_CONFIG(6, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT) |
         PIN_CONFIG(7, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT);
+}
+
+bool Kernel_initializePeripherals(void)
+{
+    /* Disable and reset everything */
+    RCC_AHBENR = 0;
+    RCC_APB1ENR = 0;
+    RCC_APB2ENR = 0;
+    RCC_AHBRSTR = 0xFFFFFFFF;
+    RCC_APB1RSTR = 0xFFFFFFFF;
+    RCC_APB2RSTR = 0xFFFFFFFF;
+    /* All device memory is strongly ordered, so no barrier */    
+    RCC_AHBRSTR = 0;
+    RCC_APB1RSTR = 0;
+    RCC_APB2RSTR = 0;
+    
+    #if F_CPU == 64000000
+    /* Start the HSI (and the LSI for the IWDG), then clock to 64 Mhz */
+    RCC_CR |= RCC_CR_HSION;
+    RCC_CSR |= RCC_CSR_LSION;
+    while ((RCC_CR & RCC_CR_HSIRDY) == 0) { }
+    /* First just switch to the HSI directly and set the prescalars we'll
+     * need later */
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV8 |
+        RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_HSICLK;
+    /* Zero wait states needed */
+    FLASH_ACR = FLASH_LATENCY_2WS | FLASH_PRFTBE | FLASH_HLFCYA;
+    
+    /*Switch to PLL */
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV8 |
+        RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_HSICLK | 
+        (RCC_CFGR_PLLMUL_PLL_CLK_MUL16 << 18) | 
+        (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
+    RCC_CR |= RCC_CR_PLLON;
+    while ((RCC_CR & RCC_CR_PLLRDY) == 0) { }
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV8 |
+        RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_PLLCLK |
+        (RCC_CFGR_PLLMUL_PLL_CLK_MUL16 << 18) | 
+        (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
+        
+    #elif F_CPU == 24000000
+    /* Start the HSI (and the LSI for the IWDG), then clock to 24 Mhz */
+    RCC_CR |= RCC_CR_HSION;
+    RCC_CSR |= RCC_CSR_LSION;
+    while ((RCC_CR & RCC_CR_HSIRDY) == 0) { }
+    /* First just switch to the HSI directly and set the prescalars we'll
+     * need later */
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV2 |
+        RCC_CFGR_PPRE1_HCLK_NODIV | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_HSICLK;
+    /* Zero wait states needed */
+    FLASH_ACR = FLASH_LATENCY_0WS | FLASH_PRFTBE | FLASH_HLFCYA;
+    
+    /*Switch to PLL */
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV2 |
+        RCC_CFGR_PPRE1_HCLK_NODIV | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_HSICLK | 
+        (RCC_CFGR_PLLMUL_PLL_CLK_MUL6 << 18) | 
+        (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
+    RCC_CR |= RCC_CR_PLLON;
+    while ((RCC_CR & RCC_CR_PLLRDY) == 0) { }
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV2 |
+        RCC_CFGR_PPRE1_HCLK_NODIV | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_PLLCLK |
+        (RCC_CFGR_PLLMUL_PLL_CLK_MUL6 << 18) | 
+        (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
+    #else
+    #error Unsupported CPU frequency
+    #endif
+    
+    /* Enable the clocks to the components the kernel uses */
+    setUsedClocks();
+    
+    resetIO();
         
     /* Pull LED up, and disable module */
     GPIO_ODR(GPIOA) = GPIO3;
@@ -154,7 +193,12 @@ bool Kernel_initializePeripherals(void)
     GPIO_ODR(GPIOB) = GPIO9;
     
     /* Setup SPI */
-    SPI_CR1(SPI1) = SPI_CR1_MSTR | SPI_CR1_BAUDRATE_FPCLK_DIV_8 | 
+    SPI_CR1(SPI1) = SPI_CR1_MSTR | 
+            #if F_CPU == 64000000
+            SPI_CR1_BAUDRATE_FPCLK_DIV_16 | 
+            #else
+            SPI_CR1_BAUDRATE_FPCLK_DIV_8 | 
+            #endif
             SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE |
             SPI_CR1_CPHA_CLK_TRANSITION_2 |
             SPI_CR1_DFF_8BIT | SPI_CR1_MSBFIRST | 
@@ -238,6 +282,8 @@ bool Kernel_initializePeripherals(void)
 void Kernel_disableUserPeripherals(void)
 {
     setUsedClocks();
+    
+    resetIO();
     
     NVIC_ICER(0) = 0xFFFFFFFF & (~(1<<NVIC_DMA1_CHANNEL2_IRQ));
     NVIC_ICER(1) = 0xFFFFFFFF & (~(1<<(NVIC_EXTI15_10_IRQ-32)));

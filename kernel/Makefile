@@ -8,6 +8,8 @@ BINARY		= kernel
 VERSION		?= $(or $(shell git describe --tags 2>/dev/null), \
 			$(shell git rev-parse HEAD 2>/dev/null), \
 			1.0)
+			
+F_CPU		?= 24000000
 
 PREFIX		?= arm-none-eabi
 CC		= $(DISTCC) $(PREFIX)-gcc
@@ -17,7 +19,8 @@ OBJDUMP		= $(PREFIX)-objdump
 SIZE		= $(PREFIX)-size
 CFLAGS		+= --std=gnu99 -Os -g -Wall -Wextra -DSTM32F1 -I.. -I../common \
 		   -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD \
-		   -DFULCRUM_VERSION='"$(VERSION)"'
+		   -DFULCRUM_VERSION='"$(VERSION)"' \
+		   -DF_CPU=$(F_CPU)
 LDSCRIPT	= $(BINARY).ld
 LDFLAGS		+= -lc -lnosys -T$(LDSCRIPT) -nostartfiles -Wl,--gc-sections \
 		   -mcpu=cortex-m3 -msoft-float
