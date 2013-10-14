@@ -36,12 +36,12 @@ static char *startOfNextParameter(char *begin)
     return begin;
 }
 
-static void beginPOSTData(void)
+static bool beginPOSTData(void)
 {
     if (controlData.base.post.data.initialize.authorizationRequired && 
             !controlData.base.post.data.initialize.authorized) {
         Server_unauthorized();
-        return;
+        return false;
     }
     
     if (controlData.base.post.data.initialize.multipart) {
@@ -53,7 +53,10 @@ static void beginPOSTData(void)
     if (!controlData.base.post.chunked && 
             controlData.base.post.remainingLength == 0) {
         controlData.base.post.remainingLength = 0xFFFFFFFF;
+    } else if (controlData.base.post.remainingLength == 0xFFFFFFFF) {
+        return true;
     }
+    return false;
 }
 static void readInitialBoundary(uint32_t lengthAdd)
 {
@@ -205,7 +208,10 @@ static bool genericPOSTProcess(HTTP_POSTFieldBegin begin,
             controlData.base.post.state = POST_Header_Authorization;
             return true;
         } else if (Server_headersEnded()) {
-            beginPOSTData();
+            if (beginPOSTData()) {
+                postRequestFinish(completed);
+                return false;
+            }
             if (httpClientSocket == -1) {
                 (completed)(-1);
                 return false;
@@ -311,15 +317,20 @@ static bool genericPOSTProcess(HTTP_POSTFieldBegin begin,
         controlData.base.post.state = POST_Header_Generic;
         return true;
         
-    case POST_Header_ContentLength:
+    case POST_Header_ContentLength: {
         if ((ptr = Server_bufferLineEnd()) == NULL)
             return false;
         
-        controlData.base.post.remainingLength = 
-            Util_parseDecimal(controlData.base.buffer.data);
+        int len = Util_parseDecimal(controlData.base.buffer.data);    
+        /* Special flag for zero length, but explicitly specified */
+        if (len == 0)
+            controlData.base.post.remainingLength = 0xFFFFFFFF;
+        else
+            controlData.base.post.remainingLength = len;
         Server_consumeBuffer(ptr);
         controlData.base.post.state = POST_Header_Generic;
         return true;
+    }
         
     case POST_Header_TransferEncoding:
         if ((ptr = Server_bufferLineEnd()) == NULL)

@@ -67,7 +67,7 @@ extern SerialSettings serialSettingsSaved;
 static SerialSettings serialSettings;
 static bool serialSettingsUpdated;
 static bool tcpPortUpdated;
-static Mutex mutex;
+static Mutex mutex = MUTEX_INITIALIZER;
 
 #define COMMAND_BLANK_TIME  ((uint32_t)(0.25 * 65536))
 typedef struct {
@@ -393,6 +393,8 @@ static bool handleUSARTRead(void)
     
     if (networkCommand.mode != Command_Inactive)
         return false;
+    if (tcpConnectedSocket < 0)
+        return false;
     
     rd = usartBufferRead;
     if (wr == rd)
@@ -578,6 +580,7 @@ void Serial_run(void)
             networkCommand.mode = Command_Inactive;
             
             acceptTCPConnection();
+            continue;
         }
         
         if (usartCommand.mode == Command_PostSequenceChecking && 

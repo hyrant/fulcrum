@@ -121,7 +121,12 @@ static void serveMainPage(int fd)
         writeDecimal(fd, ledDown);
         writeString(fd, "\"><br>"
     "<input type=\"submit\" value=\"Update\">"
-"</form><br>"
+"</form>"
+"<br>"
+"<form name=\"led\" action=\"/noop\" method=\"post\">"
+    "<input type=\"submit\" value=\"Reload\">"
+"</form>"
+"<br>"
 "<br>"
 "<br>"
 "ADC Temperature: ");
@@ -233,6 +238,27 @@ static void ledUpdateCompleted(int fd)
 }
 
 /**
+ * Discard the field name for an incoming POST field.
+ * 
+ * @param name  the name of the incoming field
+ */
+static void discardFieldBegin(const char *name)
+{
+    (void)name;
+}
+
+/**
+ * Discard the field data for an incoming POST field.
+ * 
+ * @param name  the name of the incoming field
+ */
+static void discardFieldData(const void *data, uint32_t n)
+{
+    (void)data;
+    (void)n;
+}
+
+/**
  * Called for any unknown URL by the kernel, so provide the callbacks for
  * a new main page.
  */
@@ -261,6 +287,11 @@ static HTTP_Status POST_handler(const char *path, HTTP_POSTCallback *callback)
         callback->data.begin = ledUpdateFieldBegin;
         callback->data.field = ledUpdateFieldData;
         callback->data.completed = ledUpdateCompleted;
+        return HTTP_Handled;
+    } else if (!strcmp(path, "/noop")) {
+        callback->data.begin = discardFieldBegin;
+        callback->data.field = discardFieldData;
+        callback->data.completed = serveMainPage;
         return HTTP_Handled;
     }
     return HTTP_Unhandled;
