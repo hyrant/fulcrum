@@ -12,7 +12,7 @@ SIZE		= $(PREFIX)-size
 CFLAGS		+= --std=gnu99 -Os -g -Wall -Wextra -DSTM32F1 \
 		   -I/opt/arm-cortex-m3/$(PREFIX)/include -I.. -I../common \
 		   -fno-common -mcpu=cortex-m3 -mthumb -msoft-float -MD \
-		   -DENABLE_CC3000_PATCHING
+		   -DENABLE_CC3000_PATCHING -DF_CPU=24000000 -DRAM_SIZE=8192
 LDSCRIPT	= $(BINARY).ld
 LDFLAGS		+= -lopencm3_stm32f1 -lc -lnosys -T$(LDSCRIPT) -nostartfiles \
 			-Wl,--gc-sections -mthumb -march=armv7 \

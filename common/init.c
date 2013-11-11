@@ -39,10 +39,6 @@
 #define PIN_CONFIG(n, mode, conf)   (((mode) << (((n)%8)*4)) | ((conf) << (((n)%8)*4 + 2)))
 #define PIN_CONFIG_MASK(n)          (0xF << (((n)%8)*4))
 
-#ifndef F_CPU
-#define F_CPU   24000000
-#endif
-
 #define STMAX   ((uint32_t)(F_CPU / TICK_RATE / 8 + 0.5))
 
 static void setUsedClocks(void)
@@ -125,45 +121,65 @@ bool Kernel_initializePeripherals(void)
     RCC_APB1RSTR = 0;
     RCC_APB2RSTR = 0;
     
-    #if F_CPU == 64000000
-    /* Start the HSI (and the LSI for the IWDG), then clock to 64 Mhz */
+    /* Start the HSI (and the LSI for the IWDG), then clock to target */
     RCC_CR |= RCC_CR_HSION;
     RCC_CSR |= RCC_CSR_LSION;
     while ((RCC_CR & RCC_CR_HSIRDY) == 0) { }
+    
+    #if F_CPU == 64000000
     /* First just switch to the HSI directly and set the prescalars we'll
      * need later */
-    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV8 |
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV6 |
         RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
         RCC_CFGR_SW_SYSCLKSEL_HSICLK;
-    /* Zero wait states needed */
-    FLASH_ACR = FLASH_LATENCY_2WS | FLASH_PRFTBE | FLASH_HLFCYA;
+    /* Two wait states needed */
+    FLASH_ACR = FLASH_LATENCY_2WS | FLASH_PRFTBE;
     
     /*Switch to PLL */
-    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV8 |
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV6 |
         RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
         RCC_CFGR_SW_SYSCLKSEL_HSICLK | 
         (RCC_CFGR_PLLMUL_PLL_CLK_MUL16 << 18) | 
         (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
     RCC_CR |= RCC_CR_PLLON;
     while ((RCC_CR & RCC_CR_PLLRDY) == 0) { }
-    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV8 |
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV6 |
         RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
         RCC_CFGR_SW_SYSCLKSEL_PLLCLK |
         (RCC_CFGR_PLLMUL_PLL_CLK_MUL16 << 18) | 
         (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
         
+    #elif F_CPU == 48000000
+    /* First just switch to the HSI directly and set the prescalars we'll
+     * need later */
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV4 |
+        RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_HSICLK;
+    /* One wait state needed */
+    FLASH_ACR = FLASH_LATENCY_1WS | FLASH_PRFTBE;
+    
+    /*Switch to PLL */
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV4 |
+        RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_HSICLK | 
+        (RCC_CFGR_PLLMUL_PLL_CLK_MUL12 << 18) | 
+        (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
+    RCC_CR |= RCC_CR_PLLON;
+    while ((RCC_CR & RCC_CR_PLLRDY) == 0) { }
+    RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV4 |
+        RCC_CFGR_PPRE1_HCLK_DIV2 | RCC_CFGR_PPRE2_HCLK_NODIV |
+        RCC_CFGR_SW_SYSCLKSEL_PLLCLK |
+        (RCC_CFGR_PLLMUL_PLL_CLK_MUL12 << 18) | 
+        (RCC_CFGR_PLLSRC_HSI_CLK_DIV2 << 16);
+        
     #elif F_CPU == 24000000
-    /* Start the HSI (and the LSI for the IWDG), then clock to 24 Mhz */
-    RCC_CR |= RCC_CR_HSION;
-    RCC_CSR |= RCC_CSR_LSION;
-    while ((RCC_CR & RCC_CR_HSIRDY) == 0) { }
     /* First just switch to the HSI directly and set the prescalars we'll
      * need later */
     RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV2 |
         RCC_CFGR_PPRE1_HCLK_NODIV | RCC_CFGR_PPRE2_HCLK_NODIV |
         RCC_CFGR_SW_SYSCLKSEL_HSICLK;
     /* Zero wait states needed */
-    FLASH_ACR = FLASH_LATENCY_0WS | FLASH_PRFTBE | FLASH_HLFCYA;
+    FLASH_ACR = FLASH_LATENCY_0WS | FLASH_PRFTBE;
     
     /*Switch to PLL */
     RCC_CFGR = RCC_CFGR_HPRE_SYSCLK_NODIV | RCC_CFGR_ADCPRE_PCLK2_DIV2 |

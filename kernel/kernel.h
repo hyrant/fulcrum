@@ -26,15 +26,6 @@
 #include "netapi.h"
 #include "api.h"
 
-#ifndef RAM_SIZE
-/**
- * Total package RAM size.  This is used for bounds checking on fault recovery
- * and RAM download.  There isn't a way (AFAIK) to read this at run time,
- * so it has to be predefined. 
- */
-#define RAM_SIZE        8192
-#endif
-
 /**
  * Disable processor interrupts.
  */
