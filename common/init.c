@@ -211,7 +211,7 @@ bool Kernel_initializePeripherals(void)
     /* Setup SPI */
     SPI_CR1(SPI1) = SPI_CR1_MSTR | 
             #if F_CPU == 64000000
-            SPI_CR1_BAUDRATE_FPCLK_DIV_16 | 
+            SPI_CR1_BAUDRATE_FPCLK_DIV_32 | 
             #else
             SPI_CR1_BAUDRATE_FPCLK_DIV_8 | 
             #endif

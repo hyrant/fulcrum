@@ -57,7 +57,7 @@ uint32_t Kernel_elapsed(uint32_t start)
 {
     uint32_t now = systick;
     if (now < start)
-        return 0xFFFFFFFF - start + now;
+        return 0xFFFFFFFF - start + now + 1;
     return now - start;
 }
 void Kernel_msleep(uint32_t total)

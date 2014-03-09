@@ -792,7 +792,7 @@ void Control_main(void)
         {
             uint32_t now = systick;
             if (now < lastSystick)
-                elapsedSeconds = 0xFFFFFFFF - lastSystick + now;
+                elapsedSeconds = 0xFFFFFFFF - lastSystick + now + 1;
             else
                 elapsedSeconds = now - lastSystick;
             if (elapsedSeconds >= TICK_RATE) {

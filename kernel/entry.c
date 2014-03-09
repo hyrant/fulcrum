@@ -57,7 +57,7 @@ bool Kernel_interruptsEnabled(void)
 static uint32_t wrapU32(uint32_t start, uint32_t now)
 {
     if (now < start)
-        return 0xFFFFFFFF - start + now;
+        return 0xFFFFFFFF - start + now + 1;
     return now - start;
 }
 
@@ -644,9 +644,6 @@ static void systick_handler(void)
         : "r0", "r1", "lr" );
 }
 
-#define _STRINGIFY2(x)          #x
-#define _STRINGIFY1(x)          _STRINGIFY2(x)
-#define ADD_RAM_SIZE_STRING     _STRINGIFY1(((RAM_SIZE - 1024) - 64))
 void _faultInitializeStack(void) __attribute__((naked));
 void _faultInitializeStack(void)
 {
@@ -663,7 +660,7 @@ void _faultInitializeStack(void)
         
         /* Check if the fauling stack has enough room to read the exception
          * entry frame before it. */
-        "   MOVW r1, #" ADD_RAM_SIZE_STRING " \n"
+        "   MOVW r1, %[addRAMSize] \n"
         "   ADD %0, r1 \n"
         "   CMP r0, %0 \n"
         "   BGT 3f \n"
@@ -715,7 +712,8 @@ void _faultInitializeStack(void)
         :
         : "r" ((uint32_t)&_stack), 
             [fillRegisters] "I" (sizeof(DebugRegisters) / 4 - 1),
-            [debugSize] "I" (sizeof(DebugRegisters))
+            [debugSize] "I" (sizeof(DebugRegisters)),
+            [addRAMSize] "i" ((RAM_SIZE - 1024) - 64)
         : "r0", "r1", "memory" );
 }
 
